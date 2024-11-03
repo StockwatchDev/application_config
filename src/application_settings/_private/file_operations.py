@@ -11,7 +11,6 @@ from pathvalidate import is_valid_filepath
 from application_settings._private.json_file_operations import load_json, save_json
 from application_settings._private.toml_file_operations import load_toml, save_toml
 from application_settings.parameter_kind import ParameterKind
-from application_settings.type_notation_helper import LoaderOpt, SaverOpt
 
 
 @unique
@@ -111,7 +110,7 @@ def save(path: Path, data: dict[str, Any]) -> None:
     return None
 
 
-def _get_loader(path: Path) -> LoaderOpt:
+def _get_loader(path: Path) -> Optional[Callable[[Path], dict[str, Any]]]:
     """Return the loader to be used for the file extension ext and the kind (Config or Settings)"""
     # TODO: enable with_includes for all all kinds
     ext = path.suffix[1:].lower()
@@ -154,7 +153,7 @@ def _load_with_includes(
     return data_stored
 
 
-def _get_saver(path: Path) -> SaverOpt:
+def _get_saver(path: Path) -> Optional[Callable[[Path, dict[str, Any]], None]]:
     """Return the loader to be used for the file extension ext and the kind (Config or Settings)"""
     # TODO: enable with_includes for all kinds
     ext = path.suffix[1:].lower()
