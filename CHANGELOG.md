@@ -9,7 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added - 0.6.0
 
-- Nothing yet.
+- Protocol classes: ConfigProtocol, ConfigSectionProtocol, SettingsProtocol, SettingsSectionProtocol
+
+### Changed - 0.6.0
+
+### Removed - 0.6.0
+
+- Type aliase PathOpt, use Optional[Path] instead (breaking)
 
 ## [0.5.0] - Released 2024-10-12
 
