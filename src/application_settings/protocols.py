@@ -39,6 +39,14 @@ class ParameterContainerSection(Protocol):
         """Create a new dataclass instance using data and set the singleton."""
 
 
+class ConfigSectionProtocol(ParameterContainerSection, Protocol):
+    """Protocol for a config container section"""
+
+
+class SettingsSectionProtocol(ParameterContainerSection, Protocol):
+    """Protocol for a settings container section"""
+
+
 class ParameterContainer(ParameterContainerSection, Protocol):
     """Protocol for a container"""
 
@@ -91,8 +99,12 @@ class ParameterContainer(ParameterContainerSection, Protocol):
         """Get has been called on a section before a load was done; handle this."""
 
 
-class SettingsContainer(ParameterContainer, Protocol):
-    """Protocol for a settings container; nothing special"""
+class ConfigProtocol(ParameterContainer, Protocol):
+    """Protocol for a config container"""
+
+
+class SettingsProtocol(ParameterContainer, Protocol):
+    """Protocol for a settings container"""
 
     @classmethod
     def update(cls, changes: dict[str, Any]) -> Self:

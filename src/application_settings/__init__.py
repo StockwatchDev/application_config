@@ -7,7 +7,7 @@ from loguru import logger
 from pydantic import ValidationError
 from pydantic.dataclasses import dataclass
 
-from application_settings.configuring_base import ConfigBase, ConfigSectionBase, ConfigT
+from application_settings.configuring_base import ConfigBase, ConfigSectionBase
 from application_settings.convenience import (
     config_filepath_from_cli,
     parameters_folderpath_from_cli,
@@ -15,12 +15,13 @@ from application_settings.convenience import (
     use_standard_logging,
 )
 from application_settings.parameter_kind import ParameterKind, ParameterKindStr
-from application_settings.protocols import ParameterContainer, ParameterContainerSection
-from application_settings.settings_base import (
-    SettingsBase,
-    SettingsSectionBase,
-    SettingsT,
+from application_settings.protocols import (
+    ConfigProtocol,
+    ConfigSectionProtocol,
+    SettingsProtocol,
+    SettingsSectionProtocol,
 )
+from application_settings.settings_base import SettingsBase, SettingsSectionBase
 from application_settings.type_notation_helper import PathOrStr
 
 LOGGER_NAME = "application-settings"
@@ -30,17 +31,17 @@ __version__ = version("application-settings")
 
 
 __all__ = [
-    "ConfigSectionBase",
     "ConfigBase",
-    "ConfigT",
-    "ParameterContainer",
-    "ParameterContainerSection",
+    "ConfigProtocol",
+    "ConfigSectionBase",
+    "ConfigSectionProtocol",
     "ParameterKind",
     "ParameterKindStr",
     "PathOrStr",
-    "SettingsSectionBase",
     "SettingsBase",
-    "SettingsT",
+    "SettingsProtocol",
+    "SettingsSectionBase",
+    "SettingsSectionProtocol",
     "ValidationError",
     "attributes_doc",
     "config_filepath_from_cli",
