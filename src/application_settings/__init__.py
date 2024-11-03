@@ -15,12 +15,13 @@ from application_settings.convenience import (
     use_standard_logging,
 )
 from application_settings.parameter_kind import ParameterKind, ParameterKindStr
+from application_settings.protocols import ParameterContainer, ParameterContainerSection
 from application_settings.settings_base import (
     SettingsBase,
     SettingsSectionBase,
     SettingsT,
 )
-from application_settings.type_notation_helper import PathOpt, PathOrStr
+from application_settings.type_notation_helper import PathOrStr
 
 LOGGER_NAME = "application-settings"
 logger.disable(LOGGER_NAME)
@@ -32,10 +33,11 @@ __all__ = [
     "ConfigSectionBase",
     "ConfigBase",
     "ConfigT",
+    "ParameterContainer",
+    "ParameterContainerSection",
     "ParameterKind",
-    "PathOpt",
-    "PathOrStr",
     "ParameterKindStr",
+    "PathOrStr",
     "SettingsSectionBase",
     "SettingsBase",
     "SettingsT",

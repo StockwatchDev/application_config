@@ -10,7 +10,6 @@ if sys.version_info >= (3, 10):
     from typing import TypeAlias
 
     PathOrStr: TypeAlias = Path | str
-    PathOpt: TypeAlias = Path | None
     LoaderOpt: TypeAlias = Callable[[Path], dict[str, Any]] | None
     SaverOpt: TypeAlias = Callable[[Path, dict[str, Any]], None] | None
     ModuleTypeOpt: TypeAlias = ModuleType | None
@@ -20,7 +19,6 @@ else:
     from typing_extensions import TypeAlias
 
     PathOrStr: TypeAlias = Union[Path, str]
-    PathOpt: TypeAlias = Union[Path, None]
     LoaderOpt: TypeAlias = Union[Callable[[Path], dict[str, Any]], None]
     SaverOpt: TypeAlias = Union[Callable[[Path, dict[str, Any]], None], None]
     ModuleTypeOpt: TypeAlias = Union[ModuleType, None]

@@ -3,7 +3,7 @@
 from collections.abc import Callable
 from enum import Enum, unique
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Optional, cast
 
 from loguru import logger
 from pathvalidate import is_valid_filepath
@@ -11,7 +11,7 @@ from pathvalidate import is_valid_filepath
 from application_settings._private.json_file_operations import load_json, save_json
 from application_settings._private.toml_file_operations import load_toml, save_toml
 from application_settings.parameter_kind import ParameterKind
-from application_settings.type_notation_helper import LoaderOpt, PathOpt, SaverOpt
+from application_settings.type_notation_helper import LoaderOpt, SaverOpt
 
 
 @unique
@@ -23,7 +23,7 @@ class FileFormat(Enum):
 
 
 def _check_filepath(
-    path: PathOpt,
+    path: Optional[Path],
     throw_if_invalid_path: bool,
     throw_if_file_not_found: bool,
     create_file_if_not_found: bool,
@@ -62,7 +62,7 @@ def _container_class_key(kind: ParameterKind) -> str:
 
 
 def get_container_from_file(
-    kind: ParameterKind, path: PathOpt, throw_if_file_not_found: bool
+    kind: ParameterKind, path: Optional[Path], throw_if_file_not_found: bool
 ) -> str:
     """Load data from the file given in path; log error or throw if not possible"""
     if _check_filepath(
@@ -78,7 +78,7 @@ def get_container_from_file(
 
 
 def load(
-    kind: ParameterKind, path: PathOpt, throw_if_file_not_found: bool
+    kind: ParameterKind, path: Optional[Path], throw_if_file_not_found: bool
 ) -> dict[str, Any]:
     """Load data from the file given in path; log error or throw if not possible"""
     if _check_filepath(

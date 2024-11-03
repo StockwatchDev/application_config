@@ -1,10 +1,11 @@
 """Defines protocol classes for containers and sections for configuration and settings."""
 
 import sys
-from typing import Any, Protocol
+from pathlib import Path
+from typing import Any, Optional, Protocol
 
 from application_settings.parameter_kind import ParameterKind, ParameterKindStr
-from application_settings.type_notation_helper import PathOpt, PathOrStr
+from application_settings.type_notation_helper import PathOrStr
 
 from ._private.file_operations import FileFormat
 
@@ -14,8 +15,8 @@ else:
     from typing_extensions import Self
 
 
-class ContainerSection(Protocol):
-    """Protocol for a ContainerSection"""
+class ParameterContainerSection(Protocol):
+    """Protocol for a ParameterContainerSection"""
 
     @staticmethod
     def kind() -> ParameterKind:
@@ -38,7 +39,7 @@ class ContainerSection(Protocol):
         """Create a new dataclass instance using data and set the singleton."""
 
 
-class Container(ContainerSection, Protocol):
+class ParameterContainer(ParameterContainerSection, Protocol):
     """Protocol for a container"""
 
     @classmethod
@@ -55,7 +56,7 @@ class Container(ContainerSection, Protocol):
         """Return the kind_string, lowercase, with the extension that fits the file_format."""
 
     @classmethod
-    def default_filepath(cls) -> PathOpt:
+    def default_filepath(cls) -> Optional[Path]:
         """Return the fully qualified default path for the config/settingsfile
 
         E.g. ~/.example/config.toml.
@@ -71,7 +72,7 @@ class Container(ContainerSection, Protocol):
         """
 
     @classmethod
-    def filepath(cls) -> PathOpt:
+    def filepath(cls) -> Optional[Path]:
         """Return the path for the file that holds the config / settings."""
 
     @classmethod
@@ -88,3 +89,11 @@ class Container(ContainerSection, Protocol):
     @classmethod
     def get_without_load(cls) -> None:
         """Get has been called on a section before a load was done; handle this."""
+
+
+class SettingsContainer(ParameterContainer, Protocol):
+    """Protocol for a settings container; nothing special"""
+
+    @classmethod
+    def update(cls, changes: dict[str, Any]) -> Self:
+        """Update the settings with data specified in changes and save."""

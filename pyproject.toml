@@ -125,7 +125,8 @@ load-plugins = [
 # format - handled by black
 # wrong-import-order - isort guards this
 # fixme - too handy for now
-disable = ["fixme", "format", "wrong-import-order"]
+# consider-alternative-union-syntax: we still support 3.9
+disable = ["fixme", "format", "wrong-import-order", "consider-alternative-union-syntax"]
 enable = ["useless-suppression", "use-symbolic-message-instead"]
 
 [tool.pylint.typecheck]
