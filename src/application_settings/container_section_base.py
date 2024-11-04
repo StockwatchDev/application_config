@@ -8,7 +8,7 @@ from typing import Any, Optional, cast
 from loguru import logger
 
 from application_settings.parameter_kind import ParameterKind, ParameterKindStr
-from application_settings.protocols import ParameterContainerSection
+from application_settings.protocols import ParameterContainerSectionProtocol
 
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -68,7 +68,7 @@ class ParameterContainerSectionBase(ABC):
     def _create_instance(
         cls, throw_if_file_not_found: bool = False  # pylint: disable=unused-argument
     ) -> Self:
-        """Create a new ParameterContainerSection with default values. Likely that this is wrong."""
+        """Create a new ParameterContainerSection with default values. May go wrong if section is not zeroconf."""
         return cls.set({})
 
     def _set(self) -> Self:
@@ -78,7 +78,7 @@ class ParameterContainerSectionBase(ABC):
         subsections = [
             attr
             for attr in vars(self).values()
-            if isinstance(attr, ParameterContainerSectionBase)
+            if isinstance(attr, ParameterContainerSectionProtocol)
         ]
         for subsec in subsections:
             subsec._set()  # pylint: disable=protected-access
@@ -102,4 +102,4 @@ def _check_dataclass_decorator(obj: Any) -> None:
         )
 
 
-_ALL_CONTAINER_SECTION_SINGLETONS: dict[int, ParameterContainerSection] = {}
+_ALL_CONTAINER_SECTION_SINGLETONS: dict[int, ParameterContainerSectionProtocol] = {}

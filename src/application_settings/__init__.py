@@ -16,10 +16,9 @@ from application_settings.convenience import (
 )
 from application_settings.parameter_kind import ParameterKind, ParameterKindStr
 from application_settings.protocols import (
-    ConfigProtocol,
-    ConfigSectionProtocol,
-    SettingsProtocol,
-    SettingsSectionProtocol,
+    ParameterContainerProtocol,
+    ParameterContainerSectionProtocol,
+    UpdateableParameterContainerProtocol,
 )
 from application_settings.settings_base import SettingsBase, SettingsSectionBase
 from application_settings.type_notation_helper import PathOrStr
@@ -32,17 +31,16 @@ __version__ = version("application-settings")
 
 __all__ = [
     "ConfigBase",
-    "ConfigProtocol",
     "ConfigSectionBase",
-    "ConfigSectionProtocol",
+    "ParameterContainerSectionProtocol",
+    "ParameterContainerProtocol",
     "ParameterKind",
     "ParameterKindStr",
     "PathOrStr",
     "SettingsBase",
-    "SettingsProtocol",
     "SettingsSectionBase",
-    "SettingsSectionProtocol",
     "ValidationError",
+    "UpdateableParameterContainerProtocol",
     "attributes_doc",
     "config_filepath_from_cli",
     "dataclass",

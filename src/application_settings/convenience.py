@@ -6,19 +6,19 @@ import sys
 from argparse import ArgumentParser
 from logging import Formatter, Handler, LogRecord, getLogger
 from pathlib import Path
-from typing import Optional, TypeVar, Union, cast
+from typing import Optional
 
 from loguru import logger
 
 from application_settings._private.file_operations import get_container_from_file
 from application_settings.configuring_base import ConfigBase
 from application_settings.parameter_kind import ParameterKind
-from application_settings.protocols import ConfigProtocol, SettingsProtocol
+from application_settings.protocols import (
+    ParameterContainerProtocol,
+    UpdateableParameterContainerProtocol,
+)
 from application_settings.settings_base import SettingsBase
 from application_settings.type_notation_helper import ModuleTypeOpt
-
-_ConfigT = TypeVar("_ConfigT", bound="ConfigBase")
-_SettingsT = TypeVar("_SettingsT", bound="SettingsBase")
 
 
 def _get_module_from_file(qualified_classname: str) -> ModuleTypeOpt:
@@ -62,7 +62,7 @@ def _get_module(qualified_classname: str) -> ModuleTypeOpt:
 
 def _get_config_class(
     qualified_classname: str,
-) -> Optional[type[ConfigProtocol]]:
+) -> Optional[type[ParameterContainerProtocol]]:
     if not (module := _get_module(qualified_classname)):
         return None
     components = qualified_classname.split(".")
@@ -71,16 +71,24 @@ def _get_config_class(
             f"No class {components[-1]} found in module {'.'.join(components[:-1])}"
         )
         return None
-    if not issubclass(the_class, ConfigBase):
-        logger.error(f"Class {components[-1]} is not a subclass of ConfigBase")
-        return None
-    logger.debug(f"Class {components[-1]} found")
-    return cast(type[ConfigBase], the_class)
+    logger.debug(f"Class {components[-1]} found in module {'.'.join(components[:-1])}")
+    if issubclass(the_class, ParameterContainerProtocol):
+        if not issubclass(the_class, UpdateableParameterContainerProtocol):
+            # next line should not be needed but otherwise mypy complains
+            typed_class: type[ParameterContainerProtocol] = the_class
+            return typed_class
+
+        logger.error(
+            f"Class {components[-1]} implements a Settings rather than a Config"
+        )
+    else:
+        logger.error(f"Class {components[-1]} does not implement a Config")
+    return None
 
 
 def _get_settings_class(
     qualified_classname: str,
-) -> Optional[type[SettingsProtocol]]:
+) -> Optional[type[UpdateableParameterContainerProtocol]]:
     if not (module := _get_module(qualified_classname)):
         return None
     components = qualified_classname.split(".")
@@ -89,15 +97,18 @@ def _get_settings_class(
             f"No class {components[-1]} found in module {'.'.join(components[:-1])}"
         )
         return None
-    if not issubclass(the_class, SettingsBase):
-        logger.error(f"Class {components[-1]} is not a subclass of SettingsBase")
-        return None
-    logger.debug(f"Class {components[-1]} found")
-    return cast(type[SettingsBase], the_class)
+    logger.debug(f"Class {components[-1]} found in module {'.'.join(components[:-1])}")
+    if issubclass(the_class, UpdateableParameterContainerProtocol):
+        # next line should not be needed but otherwise mypy complains
+        typed_class: type[UpdateableParameterContainerProtocol] = the_class
+        return typed_class
+
+    logger.error(f"Class {components[-1]} does not implement a Settings")
+    return None
 
 
 def config_filepath_from_cli(
-    config_class: Union[type[_ConfigT], type[ConfigBase]] = ConfigBase,
+    config_class: type[ParameterContainerProtocol] = ConfigBase,
     parser: ArgumentParser = ArgumentParser(),
     short_option: str = "-c",
     long_option: str = "--config_filepath",
@@ -117,7 +128,7 @@ def config_filepath_from_cli(
 
 
 def settings_filepath_from_cli(
-    settings_class: Union[type[_SettingsT], type[SettingsBase]] = SettingsBase,
+    settings_class: type[UpdateableParameterContainerProtocol] = SettingsBase,
     parser: ArgumentParser = ArgumentParser(),
     short_option: str = "-s",
     long_option: str = "--settings_filepath",
@@ -137,8 +148,8 @@ def settings_filepath_from_cli(
 
 
 def parameters_folderpath_from_cli(  # pylint: disable=too-many-arguments,too-many-positional-arguments
-    config_class: Union[type[_ConfigT], type[ConfigBase]] = ConfigBase,
-    settings_class: Union[type[_SettingsT], type[SettingsBase]] = SettingsBase,
+    config_class: type[ParameterContainerProtocol] = ConfigBase,
+    settings_class: type[UpdateableParameterContainerProtocol] = SettingsBase,
     parser: ArgumentParser = ArgumentParser(),
     short_option: str = "-p",
     long_option: str = "--parameters_folderpath",
@@ -160,8 +171,8 @@ def parameters_folderpath_from_cli(  # pylint: disable=too-many-arguments,too-ma
 
 
 def _parameters_filepath_from_cli(  # pylint: disable=too-many-arguments,too-many-positional-arguments
-    config_class: Optional[type[ConfigProtocol]],
-    settings_class: Optional[type[SettingsProtocol]],
+    config_class: Optional[type[ParameterContainerProtocol]],
+    settings_class: Optional[type[UpdateableParameterContainerProtocol]],
     parser: ArgumentParser,
     short_option: str,
     long_option: str,

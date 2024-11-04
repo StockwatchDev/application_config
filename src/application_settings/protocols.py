@@ -2,7 +2,7 @@
 
 import sys
 from pathlib import Path
-from typing import Any, Optional, Protocol
+from typing import Any, Optional, Protocol, runtime_checkable
 
 from application_settings.parameter_kind import ParameterKind, ParameterKindStr
 from application_settings.type_notation_helper import PathOrStr
@@ -15,7 +15,8 @@ else:
     from typing_extensions import Self
 
 
-class ParameterContainerSection(Protocol):
+@runtime_checkable
+class ParameterContainerSectionProtocol(Protocol):
     """Protocol for a ParameterContainerSection"""
 
     @staticmethod
@@ -38,17 +39,13 @@ class ParameterContainerSection(Protocol):
     def set(cls, data: dict[str, Any]) -> Self:
         """Create a new dataclass instance using data and set the singleton."""
 
-
-class ConfigSectionProtocol(ParameterContainerSection, Protocol):
-    """Protocol for a config container section"""
-
-
-class SettingsSectionProtocol(ParameterContainerSection, Protocol):
-    """Protocol for a settings container section"""
+    def _set(self) -> Self:
+        """Store the singleton (protected method)"""
 
 
-class ParameterContainer(ParameterContainerSection, Protocol):
-    """Protocol for a container"""
+@runtime_checkable
+class ParameterContainerProtocol(ParameterContainerSectionProtocol, Protocol):
+    """Protocol for a Parameter Container without update (i.e., Config)"""
 
     @classmethod
     def default_file_format(cls) -> FileFormat:
@@ -99,12 +96,9 @@ class ParameterContainer(ParameterContainerSection, Protocol):
         """Get has been called on a section before a load was done; handle this."""
 
 
-class ConfigProtocol(ParameterContainer, Protocol):
-    """Protocol for a config container"""
-
-
-class SettingsProtocol(ParameterContainer, Protocol):
-    """Protocol for a settings container"""
+@runtime_checkable
+class UpdateableParameterContainerProtocol(ParameterContainerProtocol, Protocol):
+    """Protocol for a Parameter Container that has an update method (i.e., Settings)"""
 
     @classmethod
     def update(cls, changes: dict[str, Any]) -> Self:
