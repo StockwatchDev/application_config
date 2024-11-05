@@ -7,6 +7,7 @@ from typing import Any, TypeVar
 from application_settings.container_base import ParameterContainerBase
 from application_settings.container_section_base import ParameterContainerSectionBase
 from application_settings.parameter_kind import ParameterKind
+from application_settings.protocols import UpdateableParameterContainerProtocol
 
 from ._private.file_operations import FileFormat
 
@@ -15,9 +16,9 @@ if sys.version_info >= (3, 11):
 else:
     from typing_extensions import Self
 
-
-SettingsT = TypeVar("SettingsT", bound="SettingsBase")
-SettingsT.__doc__ = "Represents SettingsBase and all subclasses"
+UpdateableParameterContainerT = TypeVar(
+    "UpdateableParameterContainerT", bound=UpdateableParameterContainerProtocol
+)
 
 
 class SettingsSectionBase(ParameterContainerSectionBase):
@@ -59,9 +60,10 @@ class SettingsBase(ParameterContainerBase):
 
 
 def _update_settings_section(
-    the_section: SettingsT, changes: dict[str, Any]
-) -> SettingsT:
+    the_settings_container: UpdateableParameterContainerT,
+    changes: dict[str, Any],
+) -> UpdateableParameterContainerT:
     "Update parameters and sections with data specified in changes"
     # in the_section._set(), which normally is always executed, we ensured that
     # the_section is a dataclass instance and hence we can ignore type errors
-    return replace(the_section, **changes)  # type: ignore[type-var]
+    return replace(the_settings_container, **changes)  # type: ignore[type-var]

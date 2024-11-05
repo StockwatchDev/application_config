@@ -123,7 +123,7 @@ class ParameterContainerBase(ParameterContainerSectionBase, ABC):
         return cls.set(data_stored)
 
     def _save(self) -> Self:
-        """Private method to save the singleton to file."""
+        """Protected method to save the singleton to file."""
         if path := self.filepath():
             path.parent.mkdir(parents=True, exist_ok=True)
             # in self._set(), which normally is always executed, we ensured that

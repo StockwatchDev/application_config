@@ -95,6 +95,9 @@ class ParameterContainerProtocol(ParameterContainerSectionProtocol, Protocol):
     def get_without_load(cls) -> None:
         """Get has been called on a section before a load was done; handle this."""
 
+    def _save(self) -> Self:
+        """Save the singleton to file (protected method)"""
+
 
 @runtime_checkable
 class UpdateableParameterContainerProtocol(ParameterContainerProtocol, Protocol):
