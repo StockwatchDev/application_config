@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added - 0.6.0
 
-- Protocol classes: ConfigProtocol, ConfigSectionProtocol, SettingsProtocol, SettingsSectionProtocol
+- Protocol classes so that we can use structural typing for function parameters and return types:
+  ParameterContainerProtocol, ParameterContainerSectionProtocol, UpdateableParameterContainerProtocol
 
 ### Changed - 0.6.0
 
