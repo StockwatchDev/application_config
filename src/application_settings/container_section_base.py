@@ -19,9 +19,9 @@ else:
 class ParameterContainerSectionBase(ABC):
     """Base class for all ParameterContainerSection classes"""
 
-    @classmethod
+    @staticmethod
     @abstractmethod
-    def kind(cls) -> ParameterKind:
+    def kind() -> ParameterKind:
         """Return either ParameterKind.CONFIG or ParameterKind.SETTINGS"""
 
     @classmethod
