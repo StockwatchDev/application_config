@@ -19,10 +19,9 @@ else:
     from typing_extensions import Self
 
 # This is not an example how to implement a ConfigSection
-# because class ApplicationSettingsConfigSection (re-)implements all methods of ConfigSectionBase.
-# This is done so that this class will meet the ConfigSection protocol
-# yet does not inherit from ConfigSectionBase and therewith prevents circular imports
-# (because ConfigSectionBase imports ApplicationSettingsConfig).
+# because class ApplicationSettingsContainerSectionBase (re-)implements all methods of ContainerSectionBase.
+# This is done so that this class will meet the ParameterContainerSection protocol
+# yet does not inherit from ContainerSectionBase and therewith prevents circular imports.
 
 
 class ApplicationSettingsContainerSectionBase(ABC):
@@ -97,6 +96,12 @@ class ApplicationSettingsSection(ApplicationSettingsContainerSectionBase):
     """Class that defines the root container of an application's settings; 
     defaults to 'application_settings.SettingsBase' but should be given an application-specific value"""
 
+    strict_mode: bool = False
+    """Whether or not to apply strict mode. In strict mode, warnings rather than debug messages are logged when: 
+    1) parameters are accessed before a file is loaded
+    2) parameters are missing from the loaded file
+    3) unknown parameters are found in the loaded file"""
+
     @staticmethod
     def kind() -> ParameterKind:
         """Return ParameterKind.SETTINGS"""
@@ -108,9 +113,15 @@ class ApplicationSettingsSection(ApplicationSettingsContainerSectionBase):
 class ApplicationConfigSection(ApplicationSettingsContainerSectionBase):
     """Config parameters for the application_settings library package"""
 
-    settings_container_class: str = "application_settings.ConfigBase"
+    config_container_class: str = "application_settings.ConfigBase"
     """Class that defines the root container of an application config; 
     defaults to 'application_settings.ConfigBase' but should be given an application-specific value"""
+
+    strict_mode: bool = False
+    """Whether or not to apply strict mode. In strict mode, warnings rather than debug messages are logged when: 
+    1) parameters are accessed before a file is loaded
+    2) parameters are missing from the loaded file
+    3) unknown parameters are found in the loaded file"""
 
     @staticmethod
     def kind() -> ParameterKind:
