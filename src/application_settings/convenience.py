@@ -6,6 +6,7 @@ import sys
 from argparse import ArgumentParser
 from logging import Formatter, Handler, LogRecord, getLogger
 from pathlib import Path
+from types import ModuleType
 from typing import Optional
 
 from loguru import logger
@@ -18,10 +19,9 @@ from application_settings.protocols import (
     UpdateableParameterContainerProtocol,
 )
 from application_settings.settings_base import SettingsBase
-from application_settings.type_notation_helper import ModuleTypeOpt
 
 
-def _get_module_from_file(qualified_classname: str) -> ModuleTypeOpt:
+def _get_module_from_file(qualified_classname: str) -> Optional[ModuleType]:
     components = qualified_classname.split(".")
     module_name = components[-2]
     filename = "/".join(components[:-1])
@@ -37,7 +37,7 @@ def _get_module_from_file(qualified_classname: str) -> ModuleTypeOpt:
     return module
 
 
-def _get_module(qualified_classname: str) -> ModuleTypeOpt:
+def _get_module(qualified_classname: str) -> Optional[ModuleType]:
     components = qualified_classname.split(".")
     if len(components) < 2:
         logger.error(

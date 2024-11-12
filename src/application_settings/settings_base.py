@@ -22,7 +22,7 @@ UpdateableParameterContainerT = TypeVar(
 
 
 class SettingsSectionBase(ParameterContainerSectionBase):
-    """Base class for all SettingsSection classes (so that we can bound a TypeVar)"""
+    """Base class for SettingsSection classes, implements the abstract methods of the base(s)"""
 
     @staticmethod
     def kind() -> ParameterKind:
@@ -31,7 +31,7 @@ class SettingsSectionBase(ParameterContainerSectionBase):
 
 
 class SettingsBase(ParameterContainerBase):
-    """Base class for main Settings class"""
+    """Base class for main Settings class, implements the abstract methods of the base(s)"""
 
     @staticmethod
     def kind() -> ParameterKind:
