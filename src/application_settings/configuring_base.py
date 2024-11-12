@@ -3,12 +3,11 @@
 from attributes_doc import attributes_doc
 from pydantic.dataclasses import dataclass
 
-from application_settings.parametrization import ApplicationConfigSection
+from application_settings._private.file_operations import FileFormat
 from application_settings.container_base import ParameterContainerBase
 from application_settings.container_section_base import ParameterContainerSectionBase
 from application_settings.parameter_kind import ParameterKind
-
-from application_settings._private.file_operations import FileFormat
+from application_settings.parametrization import ApplicationConfigSection
 
 
 class ConfigSectionBase(ParameterContainerSectionBase):

@@ -14,11 +14,11 @@ from application_settings.convenience import (
     settings_filepath_from_cli,
     use_standard_logging,
 )
+from application_settings.parameter_kind import ParameterKind, ParameterKindStr
 from application_settings.parametrization import (
     ApplicationConfigSection,
     ApplicationSettingsSection,
 )
-from application_settings.parameter_kind import ParameterKind, ParameterKindStr
 from application_settings.protocols import (
     ParameterContainerProtocol,
     ParameterContainerSectionProtocol,
