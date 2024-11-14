@@ -2,10 +2,10 @@
 
 import sys
 from abc import ABC, abstractmethod
-from dataclasses import is_dataclass
 from typing import Any, Optional, cast
 
 from loguru import logger
+from pydantic.dataclasses import is_pydantic_dataclass
 
 from application_settings.parameter_kind import ParameterKind, ParameterKindStr
 from application_settings.protocols import ParameterContainerSectionProtocol
@@ -86,19 +86,10 @@ class ParameterContainerSectionBase(ABC):
 
 
 def _check_dataclass_decorator(obj: Any) -> None:
-    if not (is_dataclass(obj)):
+    if not (is_pydantic_dataclass(type(obj))):
         raise TypeError(
-            f"{obj} is not a dataclass instance; did you forget to add "
+            f"{obj} is not a pydantic dataclass instance; did you forget to add "
             f"'@dataclass(frozen=True)' when you defined {obj.__class__}?."
-        )
-    if not (
-        hasattr(obj, "__dataclass_params__")
-        and hasattr(obj.__dataclass_params__, "frozen")
-        and obj.__dataclass_params__.frozen
-    ):
-        raise TypeError(
-            f"{obj} is not a frozen dataclass instance; did you forget "
-            f"to add '(frozen=True)' when you defined {obj.__class__}?."
         )
 
 

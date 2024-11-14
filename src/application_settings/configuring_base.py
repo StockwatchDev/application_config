@@ -1,5 +1,7 @@
 """Module for handling configuration."""
 
+from dataclasses import KW_ONLY
+
 from attributes_doc import attributes_doc
 from pydantic.dataclasses import dataclass
 
@@ -10,6 +12,7 @@ from application_settings.parameter_kind import ParameterKind
 from application_settings.parametrization import ApplicationConfigSection
 
 
+@dataclass(frozen=True)
 class ConfigSectionBase(ParameterContainerSectionBase):
     """Base class for all ConfigSection classes, implements the abstract methods of the base(s)"""
 
@@ -24,6 +27,7 @@ class ConfigSectionBase(ParameterContainerSectionBase):
 class ConfigBase(ParameterContainerBase):
     """Base class for main Config class, implements the abstract methods of the base(s)"""
 
+    _: KW_ONLY
     application_config: ApplicationConfigSection = ApplicationConfigSection()
     """Holds the configuration parameters for application_settings"""
 
