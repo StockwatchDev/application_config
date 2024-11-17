@@ -35,4 +35,4 @@ class MyExampleConfig(ConfigBase):
 
 # It is good practice to set the filepath via the command line interface
 # You can optionally set load=True
-config_filepath_from_cli(load=True)
+config_filepath_from_cli()
