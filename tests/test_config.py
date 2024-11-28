@@ -4,7 +4,7 @@
 import json
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import pytest
 import tomlkit
@@ -14,7 +14,6 @@ from application_settings import (
     LOGGER_NAME,
     ConfigBase,
     ConfigSectionBase,
-    PathOpt,
     ValidationError,
     config_filepath_from_cli,
     dataclass,
@@ -52,11 +51,6 @@ class Config(ConfigBase):
 
 
 class ConfigNoDataclass(ConfigBase):
-    """Config class def, without dataclass decorator"""
-
-
-@dataclass
-class ConfigUnfrozenDataclass(ConfigBase):
     """Config class def, without dataclass decorator"""
 
 
@@ -317,8 +311,6 @@ def test_decorator() -> None:
     # raising of TypeError:
     with pytest.raises(TypeError):
         ConfigNoDataclass.load()
-    with pytest.raises(TypeError):
-        ConfigUnfrozenDataclass.load()
 
 
 def test_config_cmdline(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -336,7 +328,7 @@ def test_config_cmdline(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_get_defaults(
     monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:
-    def mock_default_filepath() -> PathOpt:
+    def mock_default_filepath() -> Optional[Path]:
         return None
 
     monkeypatch.setattr(AnExample1Config, "default_filepath", mock_default_filepath)

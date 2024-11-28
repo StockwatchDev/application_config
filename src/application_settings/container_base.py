@@ -5,13 +5,13 @@ from abc import ABC, abstractmethod
 from dataclasses import asdict
 from pathlib import Path
 from re import sub
-from typing import Any
+from typing import Any, Optional
 
 from loguru import logger
 from pathvalidate import is_valid_filepath
 
-from application_settings.container_section_base import ContainerSectionBase
-from application_settings.type_notation_helper import PathOpt, PathOrStr
+from application_settings.container_section_base import ParameterContainerSectionBase
+from application_settings.type_notation_helper import PathOrStr
 
 from ._private.file_operations import FileFormat
 from ._private.file_operations import load as _do_load
@@ -23,13 +23,14 @@ else:
     from typing_extensions import Self
 
 
-class ContainerBase(ContainerSectionBase, ABC):
+class ParameterContainerBase(ParameterContainerSectionBase, ABC):
     """Base class for Config and Settings container classes"""
 
     @classmethod
     @abstractmethod
     def default_file_format(cls) -> FileFormat:
         """Return the default file format"""
+        # method added here because it is called by default_filename(cls)
 
     @classmethod
     def default_foldername(cls) -> str:
@@ -47,7 +48,7 @@ class ContainerBase(ContainerSectionBase, ABC):
         return f"{cls.kind_string().lower()}.{cls.default_file_format().value}"
 
     @classmethod
-    def default_filepath(cls) -> PathOpt:
+    def default_filepath(cls) -> Optional[Path]:
         """Return the fully qualified default path for the config/settingsfile
 
         E.g. ~/.example/config.toml.
@@ -63,7 +64,7 @@ class ContainerBase(ContainerSectionBase, ABC):
             ValueError: if file_path is not a valid path for the OS running the code
         """
 
-        path: PathOpt = None
+        path: Optional[Path] = None
         if isinstance(file_path, Path):
             path = file_path.resolve()
         elif file_path:
@@ -88,7 +89,7 @@ class ContainerBase(ContainerSectionBase, ABC):
                 )
 
     @classmethod
-    def filepath(cls) -> PathOpt:
+    def filepath(cls) -> Optional[Path]:
         """Return the path for the file that holds the config / settings."""
         return _ALL_PATHS.get(id(cls), cls.default_filepath())
 
@@ -114,15 +115,15 @@ class ContainerBase(ContainerSectionBase, ABC):
 
     @classmethod
     def _create_instance(cls, throw_if_file_not_found: bool = False) -> Self:
-        """Load stored data, instantiate the Container with it, store it in the singleton and return it."""
+        """Load stored data, instantiate the ParameterContainer with it, store it in the singleton and return it."""
 
         # get whatever is stored in the config/settings file
         data_stored = cls._get_saved_data(throw_if_file_not_found)
-        # instantiate and store the Container with the stored data
+        # instantiate and store the ParameterContainer with the stored data
         return cls.set(data_stored)
 
     def _save(self) -> Self:
-        """Private method to save the singleton to file."""
+        """Protected method to save the singleton to file."""
         if path := self.filepath():
             path.parent.mkdir(parents=True, exist_ok=True)
             # in self._set(), which normally is always executed, we ensured that
@@ -142,4 +143,4 @@ class ContainerBase(ContainerSectionBase, ABC):
         return _do_load(cls.kind(), cls.filepath(), throw_if_file_not_found)
 
 
-_ALL_PATHS: dict[int, PathOpt] = {}
+_ALL_PATHS: dict[int, Optional[Path]] = {}
