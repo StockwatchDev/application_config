@@ -311,8 +311,6 @@ def test_decorator() -> None:
     # raising of TypeError:
     with pytest.raises(TypeError):
         ConfigNoDataclass.load()
-    # with pytest.raises(TypeError):
-    #     ConfigUnfrozenDataclass.load()
 
 
 def test_config_cmdline(monkeypatch: pytest.MonkeyPatch) -> None:

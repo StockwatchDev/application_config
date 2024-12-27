@@ -24,6 +24,7 @@ class ParameterContainerSectionBase(ABC):
     @abstractmethod
     def kind() -> ParameterKind:
         """Return either ParameterKind.CONFIG or ParameterKind.SETTINGS"""
+        # method defined here because it is called by cls.kind_string()
 
     @classmethod
     def kind_string(cls) -> ParameterKindStr:
@@ -93,6 +94,8 @@ def _check_dataclass_decorator(obj: Any) -> None:
             f"{obj} is not a pydantic dataclass instance; did you forget to add "
             f"'@dataclass(frozen=True)' when you defined {obj.__class__}?."
         )
+    # We don't have to test for frozen=True, because a TypeError will be raised
+    # by dataclass anyway if the subclass is not frozen
 
 
 _ALL_CONTAINER_SECTION_SINGLETONS: dict[int, ParameterContainerSectionProtocol] = {}

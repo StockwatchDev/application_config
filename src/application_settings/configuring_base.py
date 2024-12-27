@@ -17,7 +17,7 @@ if sys.version_info >= (3, 10):
 
 @dataclass(frozen=True)
 class ConfigSectionBase(ParameterContainerSectionBase):
-    """Base class for all ConfigSection classes, implements the abstract methods of the base(s)"""
+    """Base class for ConfigSection classes, implements the abstract methods of the base(s)"""
 
     @staticmethod
     def kind() -> ParameterKind:
