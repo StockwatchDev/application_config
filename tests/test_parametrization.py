@@ -5,7 +5,6 @@ This module tests all public functions and classes in `application_settings.para
 ensuring 100% code coverage.
 """
 
-from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -88,11 +87,11 @@ def test_application_settings_container_section_base_set() -> None:
 
 def test_application_settings_container_section_base_create_instance() -> None:
     """Test `_create_instance` of `ApplicationSettingsContainerSectionBase`."""
-    instance = ApplicationSettingsSection._create_instance()
-    assert isinstance(instance, ApplicationSettingsSection)
+    instance_settings = ApplicationSettingsSection._create_instance()
+    assert isinstance(instance_settings, ApplicationSettingsSection)
 
-    instance = ApplicationConfigSection._create_instance()
-    assert isinstance(instance, ApplicationConfigSection)
+    instance_config = ApplicationConfigSection._create_instance()
+    assert isinstance(instance_config, ApplicationConfigSection)
 
 
 def test_application_settings_container_section_base_get_without_load() -> None:
