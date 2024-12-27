@@ -21,11 +21,6 @@ from application_settings.settings_base import SettingsBase
 from application_settings.type_notation_helper import ModuleTypeOpt
 
 
-def log_level(strict_mode: bool) -> str:
-    """Return the log level taking into consideration whether or not strict_mode is applied"""
-    return "WARNING" if strict_mode else "DEBUG"
-
-
 def _get_module_from_file(qualified_classname: str) -> ModuleTypeOpt:
     components = qualified_classname.split(".")
     module_name = components[-2]
@@ -54,7 +49,7 @@ def _get_module(qualified_classname: str) -> ModuleTypeOpt:
         logger.info(
             f"{qualified_classname}: attempted relative import with no known parent package. Will try to load file, but this may fail."
         )
-        if not (module := _get_module_from_file(".".join(components[1:]))):
+        if not (module := _get_module_from_file(qualified_classname)):
             return None
     else:
         try:

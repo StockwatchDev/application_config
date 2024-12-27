@@ -7,7 +7,6 @@ from abc import ABC, abstractmethod
 from typing import Any, Optional, cast
 
 from attributes_doc import attributes_doc
-from loguru import logger
 from pydantic.dataclasses import dataclass
 
 from application_settings.parameter_kind import ParameterKind, ParameterKindStr
@@ -22,6 +21,35 @@ else:
 # because class ApplicationSettingsContainerSectionBase (re-)implements all methods of ContainerSectionBase.
 # This is done so that this class will meet the ParameterContainerSection protocol
 # yet does not inherit from ContainerSectionBase and therewith prevents circular imports.
+
+
+def log_level(kind: ParameterKind) -> str:
+    """Return the log level taking into consideration whether or not strict_mode is applied"""
+    # we want to keep a clear else code block for 3.9
+    if sys.version_info >= (  # pylint: disable=no-else-raise
+        3,
+        10,
+    ):
+        match kind:
+            case ParameterKind.CONFIG:
+                return (
+                    "WARNING" if ApplicationConfigSection.get().strict_mode else "DEBUG"
+                )
+            case ParameterKind.SETTINGS:
+                return (
+                    "WARNING"
+                    if ApplicationSettingsSection.get().strict_mode
+                    else "DEBUG"
+                )
+        raise ValueError(f"Unknown value {kind} for ParameterKind.")
+    else:
+        if kind == ParameterKind.CONFIG:
+            return "WARNING" if ApplicationConfigSection.get().strict_mode else "DEBUG"
+        if kind == ParameterKind.SETTINGS:
+            return (
+                "WARNING" if ApplicationSettingsSection.get().strict_mode else "DEBUG"
+            )
+        raise ValueError(f"Unknown value {kind} for ParameterKind.")
 
 
 class ApplicationSettingsContainerSectionBase(ABC):
@@ -51,12 +79,7 @@ class ApplicationSettingsContainerSectionBase(ABC):
     @classmethod
     def get_without_load(cls) -> None:
         """Get has been called on a section before a load was done; handle this."""
-        # get() is called on a Section but the application
-        # has not yet created or loaded a config.
-        logger.warning(
-            f"{cls.kind_string()} section {cls.__name__} accessed before data has been loaded; "
-            f"will try to load via command line parameter '--{cls.__name__}_file'"
-        )
+        # Don't do anything here
 
     @classmethod
     def set(cls, data: dict[str, Any]) -> Self:
@@ -68,7 +91,9 @@ class ApplicationSettingsContainerSectionBase(ABC):
         cls,
     ) -> Optional[Self]:  # pylint: disable=consider-alternative-union-syntax
         """Get the singleton."""
-        if the_container := _ALL_CONTAINER_SECTION_SINGLETONS.get(id(cls)):
+        if the_container := _ALL_APPLICATION_SETTINGS_CONTAINER_SECTION_SINGLETONS.get(
+            id(cls)
+        ):
             return cast(Self, the_container)
         return None
 
@@ -82,7 +107,9 @@ class ApplicationSettingsContainerSectionBase(ABC):
     def _set(self) -> Self:
         """Store the singleton."""
         # no need to do the check on dataclass decorator
-        _ALL_CONTAINER_SECTION_SINGLETONS[id(self.__class__)] = self
+        _ALL_APPLICATION_SETTINGS_CONTAINER_SECTION_SINGLETONS[id(self.__class__)] = (
+            self
+        )
         # ApplicationSettingsSection does not have subsections
         return self
 
@@ -129,11 +156,11 @@ class ApplicationConfigSection(ApplicationSettingsContainerSectionBase):
         return ParameterKind.CONFIG
 
 
-_ALL_CONTAINER_SECTION_SINGLETONS: dict[int, ParameterContainerSectionProtocol] = {}
+_ALL_APPLICATION_SETTINGS_CONTAINER_SECTION_SINGLETONS: dict[
+    int, ParameterContainerSectionProtocol
+] = {}
+"""Can hold the singleton for ApplicationSettingsSection and for ApplicationConfigSection"""
 
 
 # TODO:
-# - create module _singleton that holds the singleton stores
-# - convert ConfigT and ConfigSectionT etc to protocols
-# - adapt tests
 # - silence logging until application settings config has been loaded

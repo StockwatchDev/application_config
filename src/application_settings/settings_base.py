@@ -39,7 +39,7 @@ class SettingsBase(ParameterContainerBase):
 
     if sys.version_info >= (3, 10):
         _: KW_ONLY
-    application_config: ApplicationSettingsSection = ApplicationSettingsSection()
+    application_settings: ApplicationSettingsSection = ApplicationSettingsSection()
     """Holds the settings parameters for application_settings"""
 
     @staticmethod

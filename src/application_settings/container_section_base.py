@@ -8,6 +8,7 @@ from loguru import logger
 from pydantic.dataclasses import is_pydantic_dataclass
 
 from application_settings.parameter_kind import ParameterKind, ParameterKindStr
+from application_settings.parametrization import log_level
 from application_settings.protocols import ParameterContainerSectionProtocol
 
 if sys.version_info >= (3, 11):
@@ -45,9 +46,10 @@ class ParameterContainerSectionBase(ABC):
         """Get has been called on a section before a load was done; handle this."""
         # get() is called on a Section but the application
         # has not yet created or loaded a config.
-        logger.warning(
+        logger.log(
+            log_level(cls.kind()),
             f"{cls.kind_string()} section {cls.__name__} accessed before data has been loaded; "
-            f"will try to load via command line parameter '--{cls.__name__}_file'"
+            f"will try to load via command line parameter '--{cls.__name__}_file'",
         )
 
     @classmethod
