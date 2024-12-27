@@ -43,7 +43,7 @@ def test_check_filepath_valid(mock_path: Path) -> None:
 def test_check_filepath_invalid_path() -> None:
     """Test `_check_filepath` with an invalid path."""
     with pytest.raises(FileNotFoundError, match="Path None not valid."):
-        _check_filepath(None, True, False, False)  # type: ignore[arg-type]
+        _check_filepath(None, True, False, False)
 
 
 def test_check_filepath_file_not_found(mock_path2: Path) -> None:
