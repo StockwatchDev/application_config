@@ -4,10 +4,12 @@
 
 import sys
 from abc import ABC, abstractmethod
+from dataclasses import fields
+from loguru import logger
 from typing import Any, Optional, cast
 
 from attributes_doc import attributes_doc
-from pydantic.dataclasses import dataclass
+from pydantic.dataclasses import dataclass, is_pydantic_dataclass
 
 from application_settings.parameter_kind import ParameterKind, ParameterKindStr
 from application_settings.protocols import ParameterContainerSectionProtocol
@@ -84,7 +86,9 @@ class ApplicationSettingsContainerSectionBase(ABC):
     @classmethod
     def set(cls, data: dict[str, Any]) -> Self:
         """Create a new dataclass instance using data and set the singleton."""
-        return cls(**data)._set()
+        new_instance = cls(**data)
+        new_instance._set()
+        return new_instance._check_initialized_and_extra(data)
 
     @classmethod
     def _get(
@@ -111,6 +115,28 @@ class ApplicationSettingsContainerSectionBase(ABC):
             self
         )
         # ApplicationSettingsSection does not have subsections
+        return self
+
+    def _check_initialized_and_extra(
+        self, data: dict[str, Any], section_name: str = ""
+    ) -> Self:
+        """Store the singleton and check if extra parameters were provided and/or parameters were missing."""
+        # No need to check for dataclass decorator
+        if is_pydantic_dataclass(type(self)):
+            section_specifier = f"in section {section_name}"
+            field_names = {fld.name for fld in fields(self)}  # type: ignore[arg-type]
+            uninitialized_field_names = field_names - set(data.keys())
+            for uninitialized_field in uninitialized_field_names:
+                logger.log(
+                    log_level(self.kind()),
+                    f"Parameter {uninitialized_field} {section_specifier} initialized with default value.",
+                )
+            extra_data_fields = set(data.keys()) - field_names
+            for extra_data_field in extra_data_fields:
+                logger.log(
+                    log_level(self.kind()),
+                    f"Extra parameter {extra_data_field} {section_specifier} that is not used for initialization.",
+                )
         return self
 
 

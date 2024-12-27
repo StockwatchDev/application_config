@@ -2,6 +2,7 @@
 
 import sys
 from abc import ABC, abstractmethod
+from dataclasses import fields
 from typing import Any, Optional, cast
 
 from loguru import logger
@@ -56,7 +57,9 @@ class ParameterContainerSectionBase(ABC):
     @classmethod
     def set(cls, data: dict[str, Any]) -> Self:
         """Create a new dataclass instance using data and set the singleton."""
-        return cls(**data)._set()
+        new_instance = cls(**data)
+        new_instance._check_initialized_and_extra(data)
+        return new_instance._set()
 
     @classmethod
     def _get(
@@ -85,6 +88,54 @@ class ParameterContainerSectionBase(ABC):
         ]
         for subsec in subsections:
             subsec._set()  # pylint: disable=protected-access
+        return self
+
+    def _check_initialized_and_extra(
+        self, data: dict[str, Any], section_name: str = ""
+    ) -> Self:
+        """Store the singleton and check if extra parameters were provided and/or parameters were missing."""
+        _check_dataclass_decorator(self)
+        if is_pydantic_dataclass(type(self)):
+            section_specifier = (
+                f"in section {section_name}" if section_name else "in the root section"
+            )
+            field_names = {fld.name for fld in fields(self)}  # type: ignore[arg-type]
+            subsection_names = {
+                fld.name
+                for fld in fields(self)  # type: ignore[arg-type]
+                if (not isinstance(fld.type, str))
+                and issubclass(fld.type, ParameterContainerSectionProtocol)
+            }
+            uninitialized_field_names = (
+                field_names - subsection_names - set(data.keys())
+            )
+            for uninitialized_field in uninitialized_field_names:
+                logger.log(
+                    log_level(self.kind()),
+                    f"Parameter {uninitialized_field} {section_specifier} initialized with default value.",
+                )
+            extra_data_fields = set(data.keys()) - field_names
+            for extra_data_field in extra_data_fields:
+                logger.log(
+                    log_level(self.kind()),
+                    f"Extra parameter {extra_data_field} {section_specifier} that is not used for initialization.",
+                )
+            subsections = [
+                (
+                    subsection_name,
+                    cast(
+                        ParameterContainerSectionProtocol,
+                        getattr(self, subsection_name),
+                    ),
+                )
+                for subsection_name in subsection_names
+            ]
+            prefix = f"{section_name}." if section_name else ""
+            for subsec_name, subsec in subsections:
+                sub_data = data.get(subsec_name, {})
+                subsec._check_initialized_and_extra(  # pylint: disable=protected-access
+                    sub_data, f"{prefix}{subsec_name}"
+                )
         return self
 
 
