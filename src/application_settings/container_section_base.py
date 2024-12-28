@@ -151,7 +151,7 @@ def _check_dataclass_decorator(obj: Any) -> None:
     if not (is_pydantic_dataclass(type(obj))):
         raise TypeError(
             f"{obj} is not a pydantic dataclass instance; did you forget to add "
-            f"'@dataclass(frozen=True)' when you defined {obj.__class__}?."
+            f"'@dataclass(frozen=True)' when you defined {obj.__class__}?"
         )
     # We don't have to test for frozen=True, because a TypeError will be raised
     # by dataclass anyway if the subclass is not frozen
