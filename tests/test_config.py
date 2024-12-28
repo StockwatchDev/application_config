@@ -262,7 +262,7 @@ def test_kind_string() -> None:
 def test_section_singleton(caplog: pytest.LogCaptureFixture) -> None:
     use_standard_logging(enable=True)
     assert AnExample1ConfigSection.get().field1 == "field1"
-    assert " accessed before data has been loaded" in caplog.records[0].msg
+    assert " accessed before data has been loaded" in caplog.records[-1].msg
     logger.disable(LOGGER_NAME)
 
 
@@ -355,7 +355,7 @@ def test_set_filepath_after_get(
     # test if the subsection singleton is properly registered
     assert AnExampleConfigSubSection.get().field3[1] == "no"
     AnExample1Config.set_filepath("", load=False)
-    assert "file is not loaded into the Config." in caplog.records[0].msg
+    assert "file is not loaded into the Config." in caplog.records[-1].msg
     logger.disable(LOGGER_NAME)
 
 

@@ -9,13 +9,13 @@ from unittest.mock import patch
 
 import pytest
 
+from application_settings.parameter_kind import ParameterKind
 from application_settings.parametrization import (
+    _ALL_APPLICATION_SETTINGS_CONTAINER_SECTION_SINGLETONS,
     ApplicationConfigSection,
     ApplicationSettingsSection,
     log_level,
-    _ALL_APPLICATION_SETTINGS_CONTAINER_SECTION_SINGLETONS,
 )
-from application_settings.parameter_kind import ParameterKind
 
 
 def test_log_level_config() -> None:

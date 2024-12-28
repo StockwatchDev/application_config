@@ -71,6 +71,11 @@ def _get_config_class(
             f"No class {components[-1]} found in module {'.'.join(components[:-1])}"
         )
         return None
+    if not isinstance(the_class, type):
+        logger.error(
+            f"Attribute {components[-1]} found in module {'.'.join(components[:-1])} but this is not a class."
+        )
+        return None
     logger.debug(f"Class {components[-1]} found in module {'.'.join(components[:-1])}")
     if issubclass(the_class, ParameterContainerProtocol):
         if not issubclass(the_class, UpdateableParameterContainerProtocol):
@@ -95,6 +100,11 @@ def _get_settings_class(
     if not (the_class := getattr(module, components[-1], None)):
         logger.error(
             f"No class {components[-1]} found in module {'.'.join(components[:-1])}"
+        )
+        return None
+    if not isinstance(the_class, type):
+        logger.error(
+            f"Attribute {components[-1]} found in module {'.'.join(components[:-1])} but this is not a class."
         )
         return None
     logger.debug(f"Class {components[-1]} found in module {'.'.join(components[:-1])}")

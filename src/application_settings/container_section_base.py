@@ -58,7 +58,8 @@ class ParameterContainerSectionBase(ABC):
     def set(cls, data: dict[str, Any]) -> Self:
         """Create a new dataclass instance using data and set the singleton."""
         new_instance = cls(**data)
-        new_instance._check_initialized_and_extra(data)
+        if data:
+            new_instance._check_initialized_and_extra(data)
         return new_instance._set()
 
     @classmethod
@@ -90,21 +91,28 @@ class ParameterContainerSectionBase(ABC):
             subsec._set()  # pylint: disable=protected-access
         return self
 
+    @staticmethod
+    def _is_parameter_container_section(a_field_type: Any) -> bool:
+        try:
+            return issubclass(a_field_type, ParameterContainerSectionProtocol)
+        except TypeError:
+            return False
+
     def _check_initialized_and_extra(
         self, data: dict[str, Any], section_name: str = ""
     ) -> Self:
         """Store the singleton and check if extra parameters were provided and/or parameters were missing."""
-        _check_dataclass_decorator(self)
         if is_pydantic_dataclass(type(self)):
             section_specifier = (
-                f"in section {section_name}" if section_name else "in the root section"
+                f" in section {section_name}"
+                if section_name
+                else " in the root section"
             )
             field_names = {fld.name for fld in fields(self)}  # type: ignore[arg-type]
             subsection_names = {
                 fld.name
                 for fld in fields(self)  # type: ignore[arg-type]
-                if (not isinstance(fld.type, str))
-                and issubclass(fld.type, ParameterContainerSectionProtocol)
+                if self._is_parameter_container_section(fld.type)
             }
             uninitialized_field_names = (
                 field_names - subsection_names - set(data.keys())
@@ -112,13 +120,13 @@ class ParameterContainerSectionBase(ABC):
             for uninitialized_field in uninitialized_field_names:
                 logger.log(
                     log_level(self.kind()),
-                    f"Parameter {uninitialized_field} {section_specifier} initialized with default value.",
+                    f"Parameter {uninitialized_field}{section_specifier} initialized with default value.",
                 )
             extra_data_fields = set(data.keys()) - field_names
             for extra_data_field in extra_data_fields:
                 logger.log(
                     log_level(self.kind()),
-                    f"Extra parameter {extra_data_field} {section_specifier} that is not used for initialization.",
+                    f"Extra parameter {extra_data_field}{section_specifier} that is not used for initialization.",
                 )
             subsections = [
                 (

@@ -1,15 +1,16 @@
 """Test the module application_settings.convenience"""
 
-import pytest
-import sys
+# pylint: disable=unused-argument
 
+import sys
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import Any, Optional
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from application_settings._private.file_operations import FileFormat
-from application_settings.parameter_kind import ParameterKind, ParameterKindStr
 from application_settings.convenience import (
     _get_config_class,
     _get_module,
@@ -20,6 +21,7 @@ from application_settings.convenience import (
     settings_filepath_from_cli,
     use_standard_logging,
 )
+from application_settings.parameter_kind import ParameterKind, ParameterKindStr
 
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -56,6 +58,12 @@ class MockParameterContainerProtocolClass:
 
     def _set(self) -> Self:
         """_set method"""
+        return self
+
+    def _check_initialized_and_extra(
+        self, data: dict[str, Any], section_name: str = ""
+    ) -> Self:
+        """_check_initialized_and_extra method"""
         return self
 
     @classmethod
@@ -197,6 +205,18 @@ def test_get_config_class_invalid_settings() -> None:
         assert _get_config_class(qualified_classname) is None
 
 
+def test_get_config_class_invalid_not_class() -> None:
+    """Test retrieving a configuration class that is not a subclass of the expected class."""
+    with patch("application_settings.convenience._get_module") as mock_get_module:
+        mock_module = MagicMock()
+
+        mock_get_module.return_value = mock_module
+        setattr(mock_module, "instanceName", MagicMock())
+
+        qualified_classname = "valid.module.instanceName"
+        assert _get_config_class(qualified_classname) is None
+
+
 def test_get_config_class_invalid_not_subclass() -> None:
     """Test retrieving a configuration class that is not a subclass of the expected class."""
     with patch("application_settings.convenience._get_module") as mock_get_module:
@@ -230,6 +250,18 @@ def test_get_config_class_invalid_no_module() -> None:
 
         qualified_classname = "invalid.module.ClassName"
         assert _get_config_class(qualified_classname) is None
+
+
+def test_get_settings_class_invalid_not_class() -> None:
+    """Test retrieving a settings class that is not a subclass of the expected class."""
+    with patch("application_settings.convenience._get_module") as mock_get_module:
+        mock_module = MagicMock()
+
+        mock_get_module.return_value = mock_module
+        setattr(mock_module, "instanceName", MagicMock())
+
+        qualified_classname = "valid.module.instanceName"
+        assert _get_settings_class(qualified_classname) is None
 
 
 def test_get_settings_class_valid() -> None:
