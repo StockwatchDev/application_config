@@ -58,8 +58,15 @@ class ParameterContainerSectionBase(ABC):
     def set(cls, data: dict[str, Any]) -> Self:
         """Create a new dataclass instance using data and set the singleton."""
         new_instance = cls(**data)
+        # config sections may be initialized without data in two situations:
+        # - during import, because a config section is a class variables of
+        #   a dataclass and hence will always be initialized without data if
+        #   they has a default value;
+        # - when the application is used in a zero conf manner.
+        # In these cases we don't want to do check for uninitialized and we
+        # will not have extra parameters, in all other cases we do check.
         if data:
-            new_instance._check_initialized_and_extra(data)
+            new_instance._check_uninitialized_and_extra(data)
         return new_instance._set()
 
     @classmethod
@@ -98,22 +105,30 @@ class ParameterContainerSectionBase(ABC):
         except TypeError:
             return False
 
-    def _check_initialized_and_extra(
+    def _check_uninitialized_and_extra(
         self, data: dict[str, Any], section_name: str = ""
     ) -> Self:
-        """Store the singleton and check if extra parameters were provided and/or parameters were missing."""
+        """Check if extra parameters were provided and/or parameters were missing; if so, log message."""
+
+        # Subclasses shall be pydantic dataclasses, however, this base class is not
+        # Hence, filter in order to do this check only for instances of pydantic dataclasses.
         if is_pydantic_dataclass(type(self)):
+            # log message needs to specify the section and the root section has no section_name
             section_specifier = (
                 f" in section {section_name}"
                 if section_name
                 else " in the root section"
             )
+            # get the names of all fields
             field_names = {fld.name for fld in fields(self)}  # type: ignore[arg-type]
+            # get the names of all fields that are a subsection
             subsection_names = {
                 fld.name
                 for fld in fields(self)  # type: ignore[arg-type]
                 if self._is_parameter_container_section(fld.type)
             }
+            # uninitialized fields are found by removing from field_names the subsection_names
+            # and the fields that are set in data
             uninitialized_field_names = (
                 field_names - subsection_names - set(data.keys())
             )
@@ -122,12 +137,14 @@ class ParameterContainerSectionBase(ABC):
                     log_level(self.kind()),
                     f"Parameter {uninitialized_field}{section_specifier} initialized with default value.",
                 )
+            # data may also contain elements that are not fields, and we want to report that as well
             extra_data_fields = set(data.keys()) - field_names
             for extra_data_field in extra_data_fields:
                 logger.log(
                     log_level(self.kind()),
                     f"Extra parameter {extra_data_field}{section_specifier} that is not used for initialization.",
                 )
+            # get subsections so that these can be checked as well
             subsections = [
                 (
                     subsection_name,
@@ -138,16 +155,19 @@ class ParameterContainerSectionBase(ABC):
                 )
                 for subsection_name in subsection_names
             ]
+            # names of subsections should be prefixed with the current section_name, followed by a dot
             prefix = f"{section_name}." if section_name else ""
+            # recurse into subsections, if any
             for subsec_name, subsec in subsections:
                 sub_data = data.get(subsec_name, {})
-                subsec._check_initialized_and_extra(  # pylint: disable=protected-access
+                subsec._check_uninitialized_and_extra(  # pylint: disable=protected-access
                     sub_data, f"{prefix}{subsec_name}"
                 )
         return self
 
 
 def _check_dataclass_decorator(obj: Any) -> None:
+    # TODO: check if we can do this in a static analysis rather than runtime
     if not (is_pydantic_dataclass(type(obj))):
         raise TypeError(
             f"{obj} is not a pydantic dataclass instance; did you forget to add "

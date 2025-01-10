@@ -67,8 +67,15 @@ class ApplicationSettingsContainerSectionBase(ABC):
     def set(cls, data: dict[str, Any]) -> Self:
         """Create a new dataclass instance using data and set the singleton."""
         new_instance = cls(**data)
+        # config sections may be initialized without data in two situations:
+        # - during import, because a config section is a class variables of
+        #   a dataclass and hence will always be initialized without data if
+        #   they has a default value;
+        # - when the application is used in a zero conf manner.
+        # In these cases we don't want to do check for uninitialized and we
+        # will not have extra parameters, in all other cases we do check.
         if data:
-            new_instance._check_initialized_and_extra(data)
+            new_instance._check_uninitialized_and_extra(data)
         return new_instance._set()
 
     @classmethod
@@ -98,19 +105,28 @@ class ApplicationSettingsContainerSectionBase(ABC):
         # ApplicationSettingsSection does not have subsections
         return self
 
-    def _check_initialized_and_extra(
+    def _check_uninitialized_and_extra(
         self, data: dict[str, Any], section_name: str = ""
     ) -> Self:
         """Store the singleton and check if extra parameters were provided and/or parameters were missing."""
+
+        # Subclasses shall be pydantic dataclasses, however, this base class is not
+        # Hence, filter in order to do this check only for instances of pydantic dataclasses.
         if is_pydantic_dataclass(type(self)):
+            # log message needs to specify the section and the root section has no section_name
             section_specifier = f" in section {section_name}"
+            # get the names of all fields
             field_names = {fld.name for fld in fields(self)}  # type: ignore[arg-type]
+            # there are no subsections here
+            # uninitialized fields are found by removing from field_names
+            # the fields that are set in data
             uninitialized_field_names = field_names - set(data.keys())
             for uninitialized_field in uninitialized_field_names:
                 logger.log(
                     log_level(self.kind()),
                     f"Parameter {uninitialized_field}{section_specifier} initialized with default value.",
                 )
+            # data may also contain elements that are not fields, and we want to report that as well
             extra_data_fields = set(data.keys()) - field_names
             for extra_data_field in extra_data_fields:
                 logger.log(

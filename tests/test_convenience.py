@@ -60,10 +60,10 @@ class MockParameterContainerProtocolClass:
         """_set method"""
         return self
 
-    def _check_initialized_and_extra(
+    def _check_uninitialized_and_extra(
         self, data: dict[str, Any], section_name: str = ""
     ) -> Self:
-        """_check_initialized_and_extra method"""
+        """_check_uninitialized_and_extra method"""
         return self
 
     @classmethod
